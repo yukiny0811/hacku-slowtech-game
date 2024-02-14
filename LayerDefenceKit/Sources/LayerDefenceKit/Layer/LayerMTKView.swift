@@ -69,7 +69,15 @@ public class LayerMTKView: MTKView {
     public override func resize(withOldSuperviewSize oldSize: NSSize) {}
     public override func viewDidEndLiveResize() {}
     public override func scrollWheel(with event: NSEvent) {
-        let scrolled = Float(event.scrollingDeltaY)
-        renderer.playerUniform.fovRadius += -scrolled * 0.01
+        let scrolledX = Float(event.scrollingDeltaX)
+        let scrolledY = Float(event.scrollingDeltaY)
+        renderer.playerUniform.position += simd_float2(-scrolledX * 0.01, -scrolledY * 0.01)
+    }
+    public override func magnify(with event: NSEvent) {
+        let scale = Float(event.magnification)
+        renderer.playerUniform.fovRadius += -scale * 10
+        if renderer.playerUniform.fovRadius < 5 {
+            renderer.playerUniform.fovRadius = 5
+        }
     }
 }
