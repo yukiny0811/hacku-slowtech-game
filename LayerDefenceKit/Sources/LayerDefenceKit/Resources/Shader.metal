@@ -80,5 +80,16 @@ kernel void renderLayer(
                                               tile64_SingleSize * float(tileIndex.y) + tileUV.y * tile64_SingleSize
                                               )
                                        );
+    
+    float2 playerNormalizedMousePos = playerUniform.normalizedMousePos;
+    ushort2 tileTextureGid_mousePos = ushort2(
+                                     ushort(frame.x + frame.z * playerNormalizedMousePos.x),
+                                     ushort(frame.y + frame.w * (1.0 - playerNormalizedMousePos.y))
+                                     );
+    
+    if (tileTextureGid.x == tileTextureGid_mousePos.x && tileTextureGid.y == tileTextureGid_mousePos.y) {
+        sampled += half4(0.2, 0.2, 0.2, 0);
+    }
+    
     drawableTexture.write(sampled, gid);
 }

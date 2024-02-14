@@ -13,6 +13,7 @@
 struct PlayerUniform {
     simd_float2 position;
     float fovRadius;
+    simd_float2 normalizedMousePos;
 };
 
 #endif /* Header_h */

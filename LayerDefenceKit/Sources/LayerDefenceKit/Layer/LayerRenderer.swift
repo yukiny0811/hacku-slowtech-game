@@ -11,7 +11,7 @@ import LayerDefenceKitCore
 
 public class LayerRenderer: NSObject, MTKViewDelegate {
     
-    var playerUniform: PlayerUniform = .init(position: .init(x: 100, y: 100), fovRadius: 10)
+    var playerUniform: PlayerUniform = .init(position: .init(x: 100, y: 100), fovRadius: 10, normalizedMousePos: .zero)
     
     let tileTexture = EMMetalTexture.create(
         width: 1024,
@@ -62,6 +62,7 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+    
     public func draw(in view: MTKView) {
         
         view.drawableSize = CGSize(
@@ -75,16 +76,17 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         let dispatch = EMMetalDispatch()
         dispatch.render(renderTargetTexture: drawable.texture, needsClear: true) { _ in }
         dispatch.compute { [self] encoder in
-            encoder.setComputePipelineState(updateLayer)
-            encoder.setTexture(tileTexture, index: 0)
-            var size = updateLayer.createDispatchSize(width: tileTexture.width, height: tileTexture.height)
-            encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
             
-            encoder.setComputePipelineState(renderLayer)
             encoder.setTexture(tileTexture, index: 0)
             encoder.setTexture(drawable.texture, index: 1)
             encoder.setTexture(MetalAsset.tiles, index: 2)
             encoder.setBytes([playerUniform], length: MemoryLayout<PlayerUniform>.stride, index: 0)
+            
+            encoder.setComputePipelineState(updateLayer)
+            var size = updateLayer.createDispatchSize(width: tileTexture.width, height: tileTexture.height)
+            encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
+            
+            encoder.setComputePipelineState(renderLayer)
             size = renderLayer.createDispatchSize(width: drawable.texture.width, height: drawable.texture.height)
             encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
         }
