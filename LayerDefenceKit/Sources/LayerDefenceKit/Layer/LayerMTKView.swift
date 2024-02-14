@@ -68,5 +68,8 @@ public class LayerMTKView: MTKView {
     public override func viewWillStartLiveResize() {}
     public override func resize(withOldSuperviewSize oldSize: NSSize) {}
     public override func viewDidEndLiveResize() {}
-    public override func scrollWheel(with event: NSEvent) {}
+    public override func scrollWheel(with event: NSEvent) {
+        let scrolled = Float(event.scrollingDeltaY)
+        renderer.playerUniform.fovRadius += -scrolled * 0.01
+    }
 }
