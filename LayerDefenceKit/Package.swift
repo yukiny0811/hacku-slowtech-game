@@ -3,21 +3,40 @@
 
 import PackageDescription
 
+extension Target {
+    var asDependency: Target.Dependency {
+        Target.Dependency(stringLiteral: self.name)
+    }
+}
+
+let dependencies: [Package.Dependency] = []
+
+enum CorePackage {}
+
+let LayerDefenceKit = Target.target(
+    name: "LayerDefenceKit",
+    dependencies: [],
+    path: "Sources/LayerDefenceKit",
+    resources: [
+        .process("Resources")
+    ]
+)
+
 let package = Package(
     name: "LayerDefenceKit",
+    platforms: [
+        .macOS(.v14)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "LayerDefenceKit",
-            targets: ["LayerDefenceKit"]),
+            targets: [
+                LayerDefenceKit.name
+            ]
+        ),
     ],
+    dependencies: dependencies,
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "LayerDefenceKit"),
-        .testTarget(
-            name: "LayerDefenceKitTests",
-            dependencies: ["LayerDefenceKit"]),
+        LayerDefenceKit
     ]
 )
