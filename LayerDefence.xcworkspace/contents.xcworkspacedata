@@ -7,4 +7,7 @@
    <FileRef
       location = "group:LayerDefence/LayerDefence.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:LayerDefencePlayground/LayerDefencePlayground.xcodeproj">
+   </FileRef>
 </Workspace>

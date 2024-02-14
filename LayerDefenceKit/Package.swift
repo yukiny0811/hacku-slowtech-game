@@ -17,10 +17,21 @@ enum CorePackage {
     static let EasyMetalShader = Target.Dependency.product(name: "EasyMetalShader", package: "EasyMetalShader")
 }
 
+let LayerDefenceKitCore = Target.target(
+    name: "LayerDefenceKitCore",
+    dependencies: [],
+    path: "Sources/LayerDefenceKitCore",
+    publicHeadersPath: "include",
+    cxxSettings: [
+        .headerSearchPath("include"),
+    ]
+)
+
 let LayerDefenceKit = Target.target(
     name: "LayerDefenceKit",
     dependencies: [
         CorePackage.EasyMetalShader,
+        LayerDefenceKitCore.asDependency,
     ],
     path: "Sources/LayerDefenceKit",
     resources: [
@@ -43,6 +54,7 @@ let package = Package(
     ],
     dependencies: dependencies,
     targets: [
-        LayerDefenceKit
+        LayerDefenceKit,
+        LayerDefenceKitCore,
     ]
 )

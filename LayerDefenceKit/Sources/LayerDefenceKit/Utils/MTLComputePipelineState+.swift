@@ -12,11 +12,9 @@ extension MTLComputePipelineState {
         width: Int,
         height: Int
     ) -> (threadGroupCount: MTLSize, threadsPerThreadGroup: MTLSize) {
-        let maxTotalThreadsPerThreadgroup = self.maxTotalThreadsPerThreadgroup
-        let threadExecutionWidth = self.threadExecutionWidth
         let threadsPerThreadgroup = MTLSize(
-            width: threadExecutionWidth,
-            height: maxTotalThreadsPerThreadgroup / threadExecutionWidth,
+            width: self.threadExecutionWidth,
+            height: self.maxTotalThreadsPerThreadgroup / self.threadExecutionWidth,
             depth: 1
         )
         let threadGroupCount = MTLSize(
