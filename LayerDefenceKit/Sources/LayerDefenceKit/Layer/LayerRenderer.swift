@@ -11,7 +11,7 @@ import LayerDefenceKitCore
 
 public class LayerRenderer: NSObject, MTKViewDelegate {
     
-    var playerUniform: PlayerUniform = .init(position: .init(x: 100, y: 100), fovRadius: 30)
+    var playerUniform: PlayerUniform = .init(position: .init(x: 100, y: 100), fovRadius: 10)
     
     let tileTexture = EMMetalTexture.create(
         width: 1024,
@@ -83,6 +83,7 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
             encoder.setComputePipelineState(renderLayer)
             encoder.setTexture(tileTexture, index: 0)
             encoder.setTexture(drawable.texture, index: 1)
+            encoder.setTexture(MetalAsset.tiles, index: 2)
             encoder.setBytes([playerUniform], length: MemoryLayout<PlayerUniform>.stride, index: 0)
             size = renderLayer.createDispatchSize(width: drawable.texture.width, height: drawable.texture.height)
             encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)

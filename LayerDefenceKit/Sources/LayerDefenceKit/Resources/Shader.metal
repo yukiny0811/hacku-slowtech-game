@@ -6,6 +6,9 @@ using namespace metal;
 
 constant float PI = 3.14159265;
 
+constant float tile64_fullSize = 1280.0;
+constant float tile64_SingleSize = 64.0;
+
 inline float rand(int x, int y, int z) {
     int seed = x + y * 57 + z * 241;
     seed = (seed<< 13) ^ seed;
@@ -30,6 +33,7 @@ kernel void updateLayer(
 kernel void renderLayer(
                         texture2d<float, access::read> tileTexture [[ texture(0) ]],
                         texture2d<half, access::write> drawableTexture [[ texture(1) ]],
+                        texture2d<half, access::sample> tiles [[ texture(2) ]],
                         const device PlayerUniform& playerUniform [[ buffer(0) ]],
                         ushort2 gid [[ thread_position_in_grid ]] //gid in drawableTexture
 ) {
@@ -39,30 +43,42 @@ kernel void renderLayer(
     float4 frame = float4(
                           playerPosition.x - playerFovRadius,
                           playerPosition.y - playerFovRadius * aspectRatio,
-                          playerPosition.x + playerFovRadius,
-                          playerPosition.y + playerFovRadius * aspectRatio
+                          playerFovRadius * 2,
+                          playerFovRadius * aspectRatio * 2
                           );
     
     float2 normalizedGidPosition = float2(
                                           float(gid.x) / float(drawableTexture.get_width()),
-                                          float(gid.y) / float(drawableTexture.get_width())
+                                          float(gid.y) / float(drawableTexture.get_height())
                                           );
     ushort2 tileTextureGid = ushort2(
                                      ushort(frame.x + frame.z * normalizedGidPosition.x),
                                      ushort(frame.y + frame.w * normalizedGidPosition.y)
                                      );
     
+    float2 tilePixelPos = float2(frame.x + frame.z * normalizedGidPosition.x, frame.y + frame.w * normalizedGidPosition.y);
+    float2 tilePixelOrigin = float2(int2(tilePixelPos));
+    float2 tileUV = (tilePixelPos - tilePixelOrigin) / 1.0;
+    
+    constexpr sampler textureSampler (coord::pixel, address::clamp_to_edge, filter::nearest);
+    
     float4 tileTexRead = tileTexture.read(tileTextureGid);
-    
     int tileType = int(tileTexRead.r);
-    half4 finalColor = half4(0, 0, 0, 1);
-    if (tileType == 0) {
-        finalColor.r = 1;
-    } else if (tileType == 1) {
-        finalColor.g = 1;
-    } else if (tileType == 2) {
-        finalColor.b = 1;
-    }
     
-    drawableTexture.write(finalColor, gid);
+    int2 tileIndex = int2(0, 0);
+    if (tileType == 0) {
+        tileIndex = int2(0, 0);
+    } else if (tileType == 1) {
+        tileIndex = int2(1, 0);
+    } else if (tileType == 2) {
+        tileIndex = int2(2, 0);
+    }
+    half4 sampled = tiles.sample(
+                                       textureSampler,
+                                       float2(
+                                              tile64_SingleSize * float(tileIndex.x) + tileUV.x * tile64_SingleSize,
+                                              tile64_SingleSize * float(tileIndex.y) + tileUV.y * tile64_SingleSize
+                                              )
+                                       );
+    drawableTexture.write(sampled, gid);
 }
