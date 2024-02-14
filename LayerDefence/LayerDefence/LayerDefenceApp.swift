@@ -12,7 +12,7 @@ import LayerDefenceKit
 struct LayerDefenceApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            GameView()
         }
     }
 }

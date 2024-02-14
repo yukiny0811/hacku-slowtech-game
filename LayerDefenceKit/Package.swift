@@ -9,13 +9,19 @@ extension Target {
     }
 }
 
-let dependencies: [Package.Dependency] = []
+let dependencies: [Package.Dependency] = [
+    .package(url: "https://github.com/yukiny0811/easymetalshader", exact: "3.1.1")
+]
 
-enum CorePackage {}
+enum CorePackage {
+    static let EasyMetalShader = Target.Dependency.product(name: "EasyMetalShader", package: "EasyMetalShader")
+}
 
 let LayerDefenceKit = Target.target(
     name: "LayerDefenceKit",
-    dependencies: [],
+    dependencies: [
+        CorePackage.EasyMetalShader,
+    ],
     path: "Sources/LayerDefenceKit",
     resources: [
         .process("Resources")

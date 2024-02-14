@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		567059892B7D3E7700415A56 /* LayerDefenceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567059882B7D3E7700415A56 /* LayerDefenceApp.swift */; };
-		5670598B2B7D3E7700415A56 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5670598A2B7D3E7700415A56 /* ContentView.swift */; };
 		5670598D2B7D3E7800415A56 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5670598C2B7D3E7800415A56 /* Assets.xcassets */; };
 		567059902B7D3E7800415A56 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5670598F2B7D3E7800415A56 /* Preview Assets.xcassets */; };
 		5670599D2B7D3ECA00415A56 /* LayerDefenceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5670599C2B7D3ECA00415A56 /* LayerDefenceKit */; };
@@ -17,7 +16,6 @@
 /* Begin PBXFileReference section */
 		567059852B7D3E7700415A56 /* LayerDefence.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LayerDefence.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		567059882B7D3E7700415A56 /* LayerDefenceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerDefenceApp.swift; sourceTree = "<group>"; };
-		5670598A2B7D3E7700415A56 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5670598C2B7D3E7800415A56 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5670598F2B7D3E7800415A56 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		567059912B7D3E7800415A56 /* LayerDefence.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LayerDefence.entitlements; sourceTree = "<group>"; };
@@ -56,7 +54,6 @@
 			isa = PBXGroup;
 			children = (
 				567059882B7D3E7700415A56 /* LayerDefenceApp.swift */,
-				5670598A2B7D3E7700415A56 /* ContentView.swift */,
 				5670598C2B7D3E7800415A56 /* Assets.xcassets */,
 				567059912B7D3E7800415A56 /* LayerDefence.entitlements */,
 				5670598E2B7D3E7800415A56 /* Preview Content */,
@@ -155,7 +152,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5670598B2B7D3E7700415A56 /* ContentView.swift in Sources */,
 				567059892B7D3E7700415A56 /* LayerDefenceApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
