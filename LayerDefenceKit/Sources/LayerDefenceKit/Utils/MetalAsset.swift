@@ -14,4 +14,9 @@ enum MetalAsset {
         scaleFactor: 1,
         bundle: .module
     )
+    static let entities: MTLTexture = try! textureLoader.newTexture(
+        name: "entities",
+        scaleFactor: 1,
+        bundle: .module
+    )
 }

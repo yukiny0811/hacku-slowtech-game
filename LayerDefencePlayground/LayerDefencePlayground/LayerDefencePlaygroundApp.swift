@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-@testable import LayerDefenceKit
+import LayerDefenceKit
 
 @main
 struct LayerDefencePlaygroundApp: App {

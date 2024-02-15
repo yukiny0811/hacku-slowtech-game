@@ -16,4 +16,10 @@ struct PlayerUniform {
     simd_float2 normalizedMousePos;
 };
 
+struct GameEntity {
+    simd_float2 position;
+    float collisionRadius;
+    simd_int2 entityTextureIndex;
+};
+
 #endif /* Header_h */
