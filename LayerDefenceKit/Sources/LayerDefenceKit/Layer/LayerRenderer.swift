@@ -26,8 +26,10 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         position: .init(x: 512, y: 512),
         collisionRadius: 3,
         entityTextureIndex: .one,
-        speed: 0,
-        entityType: 1
+        remainingHP: 1000,
+        isDead: 0,
+        speed: 10000,
+        entityType: 0
     )
     
     let tileTexture = EMMetalTexture.create(
@@ -106,6 +108,8 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
                     position: .random(in: 1...1000),
                     collisionRadius: Float.random(in: 0.3...1),
                     entityTextureIndex: .zero,
+                    remainingHP: Float.random(in: 0.5...1),
+                    isDead: 0,
                     speed: Float.random(in: 0.1...0.5),
                     entityType: 2
                 )
@@ -150,6 +154,7 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         }
         dispatch.compute { [self] encoder in
             encoder.setComputePipelineState(updateEntity)
+            encoder.setTexture(tileTexture, index: 0)
             encoder.setBuffer(entitiesBuf, offset: 0, index: 0)
             encoder.setBytes([enemyTarget], length: MemoryLayout<GameEntity>.stride, index: 1)
             encoder.dispatchThreads(
@@ -183,7 +188,14 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         vertexDescriptor.attributes[2].format = .int2
         vertexDescriptor.attributes[2].offset = 16
         vertexDescriptor.attributes[2].bufferIndex = 0
+        vertexDescriptor.attributes[3].format = .float
+        vertexDescriptor.attributes[3].offset = 24
+        vertexDescriptor.attributes[3].bufferIndex = 0
+        vertexDescriptor.attributes[4].format = .int
+        vertexDescriptor.attributes[4].offset = 28
+        vertexDescriptor.attributes[4].bufferIndex = 0
         
+        print(MemoryLayout<GameEntity>.stride)
         vertexDescriptor.layouts[0].stride = MemoryLayout<GameEntity>.stride
         vertexDescriptor.layouts[0].stepRate = 1
         vertexDescriptor.layouts[0].stepFunction = .perVertex

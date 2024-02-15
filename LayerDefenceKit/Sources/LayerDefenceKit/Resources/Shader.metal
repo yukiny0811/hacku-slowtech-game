@@ -9,6 +9,8 @@ constant float PI = 3.14159265;
 constant float tile64_fullSize = 1280.0;
 constant float tile64_SingleSize = 64.0;
 
+// tile rgba: tileType, remainingHP, nil, nil
+
 inline float rand(int x, int y, int z) {
     int seed = x + y * 57 + z * 241;
     seed = (seed<< 13) ^ seed;
@@ -33,6 +35,21 @@ inline ushort2 getTilePosFromViewPosition(PlayerUniform playerUniform, int drawa
     return tileTextureGid;
 }
 
+inline float getTileMaxHP(int tileType) {
+    if (tileType == 0) {
+        return 0;
+    } else if (tileType == 1) {
+        return 1000;
+    } else if (tileType == 2) {
+        return 100;
+    }
+    return 0;
+}
+
+inline ushort2 floatingTilePositionToGid(float2 position) {
+    return ushort2(int(position.x), int(position.y));
+}
+
 kernel void initLayer(
                       texture2d<float, access::write> tileTexture [[ texture(0) ]],
                       ushort2 gid [[ thread_position_in_grid ]]
@@ -47,11 +64,17 @@ kernel void updateLayer(
                         const device PlayerUniform& playerUniform [[ buffer(0) ]],
                         ushort2 gid [[ thread_position_in_grid ]]
 ) {
+    
+    float4 tileRead = tileTexture.read(gid);
+    if (tileRead.g <= 0) {
+        tileTexture.write(float4(0, 0, 0, 0), gid);
+    }
+    
     if (playerUniform.isMouseDown == 1) {
         int selectedTileType = playerUniform.selectedTileType;
         ushort2 writeGid = getTilePosFromViewPosition(playerUniform, drawableTexture.get_width(), drawableTexture.get_height());
         if (gid.x == writeGid.x && gid.y == writeGid.y) {
-            tileTexture.write(float4(float(selectedTileType), 0, 0, 0), gid);
+            tileTexture.write(float4(float(selectedTileType), getTileMaxHP(selectedTileType), 0, 0), gid);
         }
     }
 }
@@ -117,6 +140,12 @@ kernel void renderLayer(
         sampled += half4(0.2, 0.2, 0.2, 0);
     }
     
+    if (tileType != 0) {
+        float maxHPOfTile = getTileMaxHP(tileType);
+        float tileHPRatio = tileTexRead.g / maxHPOfTile;
+        sampled.rgb += 1.0 - tileHPRatio;
+    }
+    
     drawableTexture.write(sampled, gid);
 }
 
@@ -124,21 +153,42 @@ struct GameEntityVertIn {
     float2 position [[ attribute(0) ]];
     float collisionRadius [[ attribute(1) ]];
     int2 entityTextureIndex [[ attribute(2) ]];
+    float remainingHP [[ attribute(3) ]];
+    int isDead [[ attribute(4) ]];
 };
 
 struct RasterizerData {
     float4 position [[ position ]];
     float size [[point_size]];
     int2 entityTextureIndex [[ flat ]];
+    int isDead [[ flat ]];
 };
 
 kernel void updateEntity(
+                         texture2d<float, access::read_write> tileTex [[ texture(0) ]],
                          device GameEntity* entities [[ buffer(0) ]],
                          const device GameEntity& enemyTarget [[ buffer(1) ]],
                          uint index [[thread_position_in_grid]]
 ) {
+    if (entities[index].isDead == 1) {
+        return;
+    }
+    
     float2 toEnemyDir = normalize(enemyTarget.position - entities[index].position);
     entities[index].position += toEnemyDir * 0.1;
+    
+    ushort2 tileGid = floatingTilePositionToGid(entities[index].position);
+    
+    float4 tileRead = tileTex.read(tileGid);
+    if (tileRead.g > 0) {
+        float reductionHPValue = min(tileRead.g, entities[index].remainingHP);
+        tileRead.g -= reductionHPValue;
+        entities[index].remainingHP -= reductionHPValue;
+        tileTex.write(tileRead, tileGid);
+    }
+    if (entities[index].remainingHP <= 0) {
+        entities[index].isDead = 1;
+    }
 }
 
 vertex RasterizerData renderEntity_vert (
@@ -167,6 +217,7 @@ vertex RasterizerData renderEntity_vert (
     rd.position = float4(entityViewportPosition.x, entityViewportPosition.y, 0, 1);
     rd.size = float(drawableTexture.get_width()) / frame.z * vIn.collisionRadius;
     rd.entityTextureIndex = vIn.entityTextureIndex;
+    rd.isDead = vIn.isDead;
     return rd;
 }
 
@@ -176,6 +227,10 @@ fragment half4 renderEntity_frag (
                                   texture2d<half, access::sample> entitiesTex [[ texture(2) ]],
                                   float2 pc [[point_coord]]
 ) {
+    if (rd.isDead == 1) {
+        return c;
+    }
+    
     half4 resultColor = half4(0, 0, 0, 0);
     
     float2 uv = float2(rd.entityTextureIndex.x, rd.entityTextureIndex.y) * tile64_SingleSize + pc * tile64_SingleSize;
