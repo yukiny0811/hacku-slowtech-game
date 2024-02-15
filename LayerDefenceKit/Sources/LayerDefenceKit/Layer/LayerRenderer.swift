@@ -14,7 +14,9 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
     var playerUniform: PlayerUniform = .init(
         position: .init(x: 512, y: 512),
         fovRadius: 10,
-        normalizedMousePos: .zero
+        normalizedMousePos: .zero,
+        isMouseDown: 0,
+        selectedTileType: 0
     )
     
     var entities: [GameEntity] = []
@@ -23,7 +25,9 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
     var enemyTarget = GameEntity(
         position: .init(x: 512, y: 512),
         collisionRadius: 3,
-        entityTextureIndex: .one
+        entityTextureIndex: .one,
+        speed: 0,
+        entityType: 1
     )
     
     let tileTexture = EMMetalTexture.create(
@@ -97,7 +101,15 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         dispatch.commit()
         
         for _ in 0...300000 {
-            entities.append(GameEntity(position: .random(in: 1...1000), collisionRadius: Float.random(in: 0.3...1), entityTextureIndex: .zero))
+            entities.append(
+                GameEntity(
+                    position: .random(in: 1...1000),
+                    collisionRadius: Float.random(in: 0.3...1),
+                    entityTextureIndex: .zero,
+                    speed: Float.random(in: 0.1...0.5),
+                    entityType: 2
+                )
+            )
         }
     }
     
@@ -172,7 +184,7 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         vertexDescriptor.attributes[2].offset = 16
         vertexDescriptor.attributes[2].bufferIndex = 0
         
-        vertexDescriptor.layouts[0].stride = 24
+        vertexDescriptor.layouts[0].stride = MemoryLayout<GameEntity>.stride
         vertexDescriptor.layouts[0].stepRate = 1
         vertexDescriptor.layouts[0].stepFunction = .perVertex
         return vertexDescriptor

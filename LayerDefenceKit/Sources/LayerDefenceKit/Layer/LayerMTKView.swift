@@ -55,14 +55,23 @@ public class LayerMTKView: MTKView {
     }
     
     override public var acceptsFirstResponder: Bool { return true }
-    public override func mouseDown(with event: NSEvent) {}
+    public override func mouseDown(with event: NSEvent) {
+        renderer.playerUniform.isMouseDown = 1
+    }
     public override func mouseMoved(with event: NSEvent) {
         renderer.playerUniform.normalizedMousePos = getNormalizedMouseLocation(event: event)
     }
-    public override func mouseDragged(with event: NSEvent) {}
-    public override func mouseUp(with event: NSEvent) {}
+    public override func mouseDragged(with event: NSEvent) {
+        renderer.playerUniform.isMouseDown = 1
+        renderer.playerUniform.normalizedMousePos = getNormalizedMouseLocation(event: event)
+    }
+    public override func mouseUp(with event: NSEvent) {
+        renderer.playerUniform.isMouseDown = 0
+    }
     public override func mouseEntered(with event: NSEvent) {}
-    public override func mouseExited(with event: NSEvent) {}
+    public override func mouseExited(with event: NSEvent) {
+        renderer.playerUniform.isMouseDown = 0
+    }
     public override func keyDown(with event: NSEvent) {}
     public override func keyUp(with event: NSEvent) {}
     public override func viewWillStartLiveResize() {}

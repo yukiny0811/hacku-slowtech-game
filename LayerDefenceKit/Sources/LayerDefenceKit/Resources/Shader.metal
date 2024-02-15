@@ -15,19 +15,45 @@ inline float rand(int x, int y, int z) {
     return (( 1.0 - ( (seed * (seed * seed * 15731 + 789221) + 1376312589) & 2147483647) / 1073741824.0f) + 1.0f) / 2.0f;
 }
 
+inline ushort2 getTilePosFromViewPosition(PlayerUniform playerUniform, int drawableTexWidth, int drawableTexHeight) {
+    float2 playerPosition = playerUniform.position;
+    float playerFovRadius = playerUniform.fovRadius;
+    float aspectRatio = float(drawableTexHeight) / float(drawableTexWidth);
+    float4 frame = float4(
+                          playerPosition.x - playerFovRadius,
+                          playerPosition.y - playerFovRadius * aspectRatio,
+                          playerFovRadius * 2,
+                          playerFovRadius * aspectRatio * 2
+                          );
+    
+    ushort2 tileTextureGid = ushort2(
+                                     ushort(frame.x + frame.z * playerUniform.normalizedMousePos.x),
+                                     ushort(frame.y + frame.w * (1.0 - playerUniform.normalizedMousePos.y))
+                                     );
+    return tileTextureGid;
+}
+
 kernel void initLayer(
                       texture2d<float, access::write> tileTexture [[ texture(0) ]],
                       ushort2 gid [[ thread_position_in_grid ]]
 ) {
-    int tileType = int(rand(int(gid.x * 358), int(gid.y * 123), 149) * 3);
+    int tileType = 0;
     tileTexture.write(float4(float(tileType), 0, 0, 0), gid);
 }
 
 kernel void updateLayer(
                         texture2d<float, access::read_write> tileTexture [[ texture(0) ]],
+                        texture2d<half, access::read> drawableTexture [[ texture(1) ]],
+                        const device PlayerUniform& playerUniform [[ buffer(0) ]],
                         ushort2 gid [[ thread_position_in_grid ]]
 ) {
-
+    if (playerUniform.isMouseDown == 1) {
+        int selectedTileType = playerUniform.selectedTileType;
+        ushort2 writeGid = getTilePosFromViewPosition(playerUniform, drawableTexture.get_width(), drawableTexture.get_height());
+        if (gid.x == writeGid.x && gid.y == writeGid.y) {
+            tileTexture.write(float4(float(selectedTileType), 0, 0, 0), gid);
+        }
+    }
 }
 
 kernel void renderLayer(
