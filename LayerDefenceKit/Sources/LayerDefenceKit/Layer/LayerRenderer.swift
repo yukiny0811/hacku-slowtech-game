@@ -25,10 +25,8 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
     var enemyTarget = GameEntity(
         position: .init(x: 512, y: 512),
         collisionRadius: 3,
-        entityTextureIndex: .one,
-        remainingHP: 1000,
+        remainingHP: 10000,
         isDead: 0,
-        speed: 10000,
         entityType: 0
     )
     
@@ -39,6 +37,32 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         label: "tileTexture",
         isRenderTarget: true
     )
+    
+    let routeTexture = EMMetalTexture.create(
+        width: 1024,
+        height: 1024,
+        pixelFormat: .rgba32Float,
+        label: "routeTexture",
+        isRenderTarget: false
+    )
+    
+    let initRouteLayer: MTLComputePipelineState = {
+        let function = ShaderCore.library.makeFunction(name: "initRouteLayer")!
+        let computeDesc = MTLComputePipelineDescriptor()
+        computeDesc.computeFunction = function
+        computeDesc.maxCallStackDepth = 1
+        let state = try! ShaderCore.device.makeComputePipelineState(descriptor: computeDesc, options: [], reflection: nil)
+        return state
+    }()
+    
+    let updateRouteLayer: MTLComputePipelineState = {
+        let function = ShaderCore.library.makeFunction(name: "updateRouteLayer")!
+        let computeDesc = MTLComputePipelineDescriptor()
+        computeDesc.computeFunction = function
+        computeDesc.maxCallStackDepth = 1
+        let state = try! ShaderCore.device.makeComputePipelineState(descriptor: computeDesc, options: [], reflection: nil)
+        return state
+    }()
     
     let initLayer: MTLComputePipelineState = {
         let function = ShaderCore.library.makeFunction(name: "initLayer")!
@@ -100,6 +124,13 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
             let size = initLayer.createDispatchSize(width: tileTexture.width, height: tileTexture.height)
             encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
         }
+        dispatch.compute { [self] encoder in
+            encoder.setComputePipelineState(initRouteLayer)
+            encoder.setTexture(routeTexture, index: 4)
+            encoder.setBytes([enemyTarget], length: MemoryLayout<GameEntity>.stride, index: 1)
+            let size = initLayer.createDispatchSize(width: routeTexture.width, height: routeTexture.height)
+            encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
+        }
         dispatch.commit()
         
         for _ in 0...300000 {
@@ -107,11 +138,9 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
                 GameEntity(
                     position: .random(in: 1...1000),
                     collisionRadius: Float.random(in: 0.3...1),
-                    entityTextureIndex: .zero,
                     remainingHP: Float.random(in: 0.5...1),
                     isDead: 0,
-                    speed: Float.random(in: 0.1...0.5),
-                    entityType: 2
+                    entityType: 1
                 )
             )
         }
@@ -142,6 +171,7 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
             encoder.setTexture(tileTexture, index: 0)
             encoder.setTexture(drawable.texture, index: 1)
             encoder.setTexture(MetalAsset.tiles, index: 2)
+            encoder.setTexture(routeTexture, index: 4)
             encoder.setBytes([playerUniform], length: MemoryLayout<PlayerUniform>.stride, index: 0)
             
             encoder.setComputePipelineState(updateLayer)
@@ -153,8 +183,19 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
             encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
         }
         dispatch.compute { [self] encoder in
+            encoder.setTexture(routeTexture, index: 4)
+            encoder.setTexture(tileTexture, index: 1)
+            encoder.setBytes([enemyTarget], length: MemoryLayout<GameEntity>.stride, index: 1)
+            encoder.setComputePipelineState(updateRouteLayer)
+            let size = renderLayer.createDispatchSize(width: routeTexture.width, height: routeTexture.height)
+            for _ in 0...10 {
+                encoder.dispatchThreadgroups(size.threadGroupCount, threadsPerThreadgroup: size.threadsPerThreadGroup)
+            }
+        }
+        dispatch.compute { [self] encoder in
             encoder.setComputePipelineState(updateEntity)
             encoder.setTexture(tileTexture, index: 0)
+            encoder.setTexture(routeTexture, index: 4)
             encoder.setBuffer(entitiesBuf, offset: 0, index: 0)
             encoder.setBytes([enemyTarget], length: MemoryLayout<GameEntity>.stride, index: 1)
             encoder.dispatchThreads(
@@ -185,14 +226,14 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         vertexDescriptor.attributes[1].format = .float
         vertexDescriptor.attributes[1].offset = 8
         vertexDescriptor.attributes[1].bufferIndex = 0
-        vertexDescriptor.attributes[2].format = .int2
-        vertexDescriptor.attributes[2].offset = 16
+        vertexDescriptor.attributes[2].format = .float
+        vertexDescriptor.attributes[2].offset = 12
         vertexDescriptor.attributes[2].bufferIndex = 0
-        vertexDescriptor.attributes[3].format = .float
-        vertexDescriptor.attributes[3].offset = 24
+        vertexDescriptor.attributes[3].format = .int
+        vertexDescriptor.attributes[3].offset = 16
         vertexDescriptor.attributes[3].bufferIndex = 0
         vertexDescriptor.attributes[4].format = .int
-        vertexDescriptor.attributes[4].offset = 28
+        vertexDescriptor.attributes[4].offset = 20
         vertexDescriptor.attributes[4].bufferIndex = 0
         
         print(MemoryLayout<GameEntity>.stride)

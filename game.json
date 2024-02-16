@@ -1,19 +1,25 @@
 {
     "tiles": [
         {
+            "name": "none",
             "maxHP": 0.0,
             "tileImageIndexX": 0,
-            "tileImageIndexY": 0
+            "tileImageIndexY": 0,
+            "isWall": 0
         },
         {
-            "maxHP": 1000.0,
-            "tileImageIndexX": 1,
-            "tileImageIndexY": 0
-        },
-        {
+            "name": "wall1",
             "maxHP": 100.0,
+            "tileImageIndexX": 1,
+            "tileImageIndexY": 0,
+            "isWall": 1
+        },
+        {
+            "name": "wall2",
+            "maxHP": 1000.0,
             "tileImageIndexX": 2,
-            "tileImageIndexY": 0
+            "tileImageIndexY": 0,
+            "isWall": 1
         }
     ]
 }

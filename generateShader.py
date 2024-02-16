@@ -21,6 +21,18 @@ for tile in d["tiles"]:
     iterationCount += 1
 tileIndexString += "return int2(0, 0);}"
 
+iterationCount = 0
+isWallString = "inline bool isTileWall(int type) { if (false) {}"
+for tile in d["tiles"]:
+    isWallString += "else if (type == " + str(iterationCount) + ") { return "
+    if tile["isWall"] == 0:
+        isWallString += "false"
+    else:
+        isWallString += "true"
+    isWallString += ";}"
+    iterationCount += 1
+isWallString += "return false;}"
+
 # write to metal file
 
 finalString = ""
@@ -30,5 +42,6 @@ finalString += '#include "../../LayerDefenceKitCore/include/LayerDefenceKitCore.
 finalString += "using namespace metal;\n"
 finalString += tileString
 finalString += tileIndexString
+finalString += isWallString
 with open("LayerDefenceKit/Sources/LayerDefenceKit/Resources/Generated.metal", "w") as f:
     f.write(finalString)

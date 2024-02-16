@@ -21,10 +21,8 @@ struct PlayerUniform {
 struct GameEntity {
     simd_float2 position;
     float collisionRadius;
-    simd_int2 entityTextureIndex;
     float remainingHP;
     int isDead;
-    float speed;
     int entityType;
 };
 
