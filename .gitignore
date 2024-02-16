@@ -7,3 +7,4 @@ DerivedData/
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+/LayerDefenceKit/Sources/LayerDefenceKit/Resources/Generated.metal

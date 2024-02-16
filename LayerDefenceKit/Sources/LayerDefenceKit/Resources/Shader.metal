@@ -2,6 +2,7 @@
 #include <metal_stdlib>
 #include <simd/simd.h>
 #include "../../LayerDefenceKitCore/include/LayerDefenceKitCore.h"
+#include "Generated.metal"
 using namespace metal;
 
 constant float PI = 3.14159265;
@@ -33,17 +34,6 @@ inline ushort2 getTilePosFromViewPosition(PlayerUniform playerUniform, int drawa
                                      ushort(frame.y + frame.w * (1.0 - playerUniform.normalizedMousePos.y))
                                      );
     return tileTextureGid;
-}
-
-inline float getTileMaxHP(int tileType) {
-    if (tileType == 0) {
-        return 0;
-    } else if (tileType == 1) {
-        return 1000;
-    } else if (tileType == 2) {
-        return 100;
-    }
-    return 0;
 }
 
 inline ushort2 floatingTilePositionToGid(float2 position) {
@@ -114,14 +104,7 @@ kernel void renderLayer(
     float4 tileTexRead = tileTexture.read(tileTextureGid);
     int tileType = int(tileTexRead.r);
     
-    int2 tileIndex = int2(0, 0);
-    if (tileType == 0) {
-        tileIndex = int2(0, 0);
-    } else if (tileType == 1) {
-        tileIndex = int2(1, 0);
-    } else if (tileType == 2) {
-        tileIndex = int2(2, 0);
-    }
+    int2 tileIndex = getTileTextureIndex(tileType);
     half4 sampled = tiles.sample(
                                        textureSampler,
                                        float2(
