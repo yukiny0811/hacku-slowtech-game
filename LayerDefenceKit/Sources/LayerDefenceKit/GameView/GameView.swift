@@ -46,6 +46,9 @@ struct GamePlayView: View {
                     Button("tile2") {
                         layer1Renderer.playerUniform.selectedTileType = 2
                     }
+                    Button("tile3") {
+                        layer1Renderer.playerUniform.selectedTileType = 3
+                    }
                 }
             }
             .frame(height: 50)

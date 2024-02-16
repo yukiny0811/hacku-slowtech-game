@@ -5,21 +5,32 @@
             "maxHP": 0.0,
             "tileImageIndexX": 0,
             "tileImageIndexY": 0,
-            "isWall": 0
+            "isWall": 0,
+            "isAttackTarget": 0
         },
         {
             "name": "wall1",
             "maxHP": 100.0,
             "tileImageIndexX": 1,
             "tileImageIndexY": 0,
-            "isWall": 1
+            "isWall": 1,
+            "isAttackTarget": 0
         },
         {
             "name": "wall2",
             "maxHP": 1000.0,
             "tileImageIndexX": 2,
             "tileImageIndexY": 0,
-            "isWall": 1
+            "isWall": 1,
+            "isAttackTarget": 0
+        },
+        {
+            "name": "turret1",
+            "maxHP": 1000.0,
+            "tileImageIndexX": 3,
+            "tileImageIndexY": 0,
+            "isWall": 0,
+            "isAttackTarget": 1
         }
     ]
 }

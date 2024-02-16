@@ -24,6 +24,8 @@ struct GameEntity {
     float remainingHP;
     int isDead;
     int entityType;
+    simd_float2 direction;
+    int remainingLifetime;
 };
 
 #endif /* Header_h */

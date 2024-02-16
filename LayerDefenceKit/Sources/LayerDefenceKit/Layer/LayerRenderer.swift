@@ -27,7 +27,9 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         collisionRadius: 3,
         remainingHP: 10000,
         isDead: 0,
-        entityType: 0
+        entityType: 0,
+        direction: .zero,
+        remainingLifetime: 0
     )
     
     let tileTexture = EMMetalTexture.create(
@@ -133,14 +135,29 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
         }
         dispatch.commit()
         
+        for _ in 0...300 {
+            entities.append(
+                GameEntity(
+                    position: .random(in: 400...600),
+                    collisionRadius: 0.8,
+                    remainingHP: 5,
+                    isDead: 0,
+                    entityType: Bool.random() ? 1 : 3,
+                    direction: .zero, 
+                    remainingLifetime: 0
+                )
+            )
+        }
         for _ in 0...300000 {
             entities.append(
                 GameEntity(
-                    position: .random(in: 1...1000),
-                    collisionRadius: Float.random(in: 0.3...1),
-                    remainingHP: Float.random(in: 0.5...1),
-                    isDead: 0,
-                    entityType: 1
+                    position: .init(0, 0),
+                    collisionRadius: 0.3,
+                    remainingHP: 5,
+                    isDead: 1,
+                    entityType: 2,
+                    direction: .zero,
+                    remainingLifetime: 0
                 )
             )
         }
@@ -197,6 +214,7 @@ public class LayerRenderer: NSObject, MTKViewDelegate {
             encoder.setTexture(tileTexture, index: 0)
             encoder.setTexture(routeTexture, index: 4)
             encoder.setBuffer(entitiesBuf, offset: 0, index: 0)
+            encoder.setBytes([simd_float4.random(in: 100...1000)], length: MemoryLayout<simd_float4>.stride, index: 10)
             encoder.setBytes([enemyTarget], length: MemoryLayout<GameEntity>.stride, index: 1)
             encoder.dispatchThreads(
                 MTLSize(width: entities.count, height: 1, depth: 1),

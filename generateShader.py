@@ -33,6 +33,18 @@ for tile in d["tiles"]:
     iterationCount += 1
 isWallString += "return false;}"
 
+iterationCount = 0
+isAttackTargetString = "inline bool isAttackTarget(int type) { if (false) {}"
+for tile in d["tiles"]:
+    isAttackTargetString += "else if (type == " + str(iterationCount) + ") { return "
+    if tile["isAttackTarget"] == 0:
+        isAttackTargetString += "false"
+    else:
+        isAttackTargetString += "true"
+    isAttackTargetString += ";}"
+    iterationCount += 1
+isAttackTargetString += "return false;}"
+
 # write to metal file
 
 finalString = ""
@@ -43,5 +55,6 @@ finalString += "using namespace metal;\n"
 finalString += tileString
 finalString += tileIndexString
 finalString += isWallString
+finalString += isAttackTargetString
 with open("LayerDefenceKit/Sources/LayerDefenceKit/Resources/Generated.metal", "w") as f:
     f.write(finalString)
